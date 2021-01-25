@@ -1383,10 +1383,10 @@ emojis-list@^3.0.0:
   resolved "https://registry.yarnpkg.com/emojis-list/-/emojis-list-3.0.0.tgz#5570662046ad29e2e916e71aae260abdff4f6a78"
   integrity sha512-/kyM18EfinwXZbno9FyUGeFh87KC8HRQBQGildHZbEuRyWFOmv1U10o9BBp8XVZDVNNuQKyIGIu5ZYAAXJ0V2Q==
 
-esbuild@^0.8.26:
-  version "0.8.33"
-  resolved "https://registry.yarnpkg.com/esbuild/-/esbuild-0.8.33.tgz#4e24ab4e780b08ff5527171bf5a684594c8b56e9"
-  integrity sha512-2ms/P6Y9zJfopR9dKo2vHzhXKfGSNlquVVoVOF8YnhjuzZVrvManMVBPadBsR/t7jzIkRnwqvxrs7d4f3C3eyg==
+esbuild@^0.8.34:
+  version "0.8.34"
+  resolved "https://registry.yarnpkg.com/esbuild/-/esbuild-0.8.34.tgz#16b4ac58f74c821d2c5a8c2f0585ca96a38ab4e6"
+  integrity sha512-tnr0V1ooakYr1aRLXQLzCn2GVG1kBTW3FWpRyC+NgrR3ntsouVpJOlTOV0BS4YLATx3/c+x3h/uBq9lWJlUAtQ==
 
 escalade@^3.1.1:
   version "3.1.1"
@@ -2360,12 +2360,12 @@ vite-plugin-pwa@^0.3.9:
     pretty-bytes "^5.5.0"
     workbox-build "^6.0.2"
 
-vite@^2.0.0-beta.3ė:
-  version "2.0.0-beta.34"
-  resolved "https://registry.yarnpkg.com/vite/-/vite-2.0.0-beta.34.tgz#8db57443789b1bb0eac624cc596f3aeb7fde9eea"
-  integrity sha512-D4/2WBf219mZBgDRiKfMwK/07UGiP+d56W2a2SEqf21iMOfM3yNBf3cfTY7qrHoi28EUo8l1LVwkSFPNbFlV2w==
+vite@^2.0.0-beta.47:
+  version "2.0.0-beta.47"
+  resolved "https://registry.yarnpkg.com/vite/-/vite-2.0.0-beta.47.tgz#9fb583f731e88001396164ff603df0a0f83279f1"
+  integrity sha512-SkrdOVHj2T7ZlMhnCBjuPWK3qAMEkM/hz3L8vgOJHTuoRXtwAvh6bjRmLuNszP5ORmN+1sYrgz7MsUNVMxEJLg==
   dependencies:
-    esbuild "^0.8.26"
+    esbuild "^0.8.34"
     postcss "^8.2.1"
     resolve "^1.19.0"
     rollup "^2.35.1"
