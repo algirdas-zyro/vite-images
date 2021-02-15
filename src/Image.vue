@@ -31,7 +31,7 @@ const WIDTH_BREAKPOINTS = [
 
 const SIZES = [
   "666px", // explicit width
-  "calc(100vw - 32px)", // mobile full-width image
+  `calc(100vw - ${props.mobilePadding * 2}px)`, // mobile full-width image
 ];
 
 const DPI_LEVELS = [1, 2, 3];
@@ -57,8 +57,8 @@ export default {
       default: null,
     },
     mobilePadding: {
-      type: String,
-      default: "32px", // --m-block-padding -- you usually won't override this
+      type: Number,
+      default: 16, // --m-block-padding -- you usually won't override this
     },
   },
   setup(props) {
@@ -76,18 +76,23 @@ export default {
 
     const sizes = computed(
       () =>
-        `(min-width: ${BUILDER_MOBILE_BREAKPOINT}px) ${props.width}px, calc(100vw - ${props.mobilePadding})`
+        `(min-width: ${BUILDER_MOBILE_BREAKPOINT}px) ${
+          props.width
+        }px, calc(100vw - ${props.mobilePadding * 2}px)`
     );
 
     const srcset = computed(() => {
       // ADD DPI LEVELS HERE
       return WIDTH_BREAKPOINTS.filter((width) => width < props.width)
-        .reduce((acc, curr) => [...acc, curr, curr * 2, curr * 3, curr * 4], [
-          +props.width,
-          +props.width * 2,
-          +props.width * 3,
-          +props.width * 4,
-        ])
+        .reduce(
+          (acc, curr) => {
+            const mobileSrcsets = DPI_LEVELS.map(
+              (level) => level * (curr - props.mobilePadding * 2)
+            );
+            return [...acc, ...mobileSrcsets];
+          },
+          [+props.width, +props.width * 2]
+        )
         .sort((a, b) => a - b)
         .map((width) => `${getCloudflareUrl(props.url, { width })} ${width}w`)
         .join(", ");
