@@ -29,10 +29,10 @@ const WIDTH_BREAKPOINTS = [
   1920, // 12.6%
 ];
 
-const SIZES = [
-  "666px", // explicit width
-  `calc(100vw - ${props.mobilePadding * 2}px)`, // mobile full-width image
-];
+// const SIZES = [
+//   "666px", // explicit width
+//   `calc(100vw - ${props.mobilePadding * 2}px)`, // mobile full-width image
+// ];
 
 const DPI_LEVELS = [1, 2, 3];
 
