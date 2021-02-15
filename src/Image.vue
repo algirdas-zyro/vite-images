@@ -82,9 +82,11 @@ export default {
     const srcset = computed(() => {
       // ADD DPI LEVELS HERE
       return WIDTH_BREAKPOINTS.filter((width) => width < props.width)
-        .reduce((acc, curr) => [...acc, curr, curr * 2], [
+        .reduce((acc, curr) => [...acc, curr, curr * 2, curr * 3, curr * 4], [
           +props.width,
           +props.width * 2,
+          +props.width * 3,
+          +props.width * 4,
         ])
         .sort((a, b) => a - b)
         .map((width) => `${getCloudflareUrl(props.url, { width })} ${width}w`)
