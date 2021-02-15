@@ -5,7 +5,6 @@
       :sizes="sizes"
       :src="src"
       :srcset="srcset"
-      :width="width"
       @load="handleOnLoad($event)"
     />
     {{ currentSrc }}
@@ -80,6 +79,7 @@ export default {
     );
 
     const srcset = computed(() => {
+      // ADD DPI LEVELS HERE
       return WIDTH_BREAKPOINTS.filter((width) => width < props.width)
         .reduce((acc, curr) => [...acc, curr, curr * 2], [
           +props.width,
