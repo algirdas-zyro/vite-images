@@ -19,9 +19,10 @@ const BUILDER_MOBILE_BREAKPOINT = 920;
 
 // https://analytics.google.com/analytics/web/#/report/visitors-browser/a26575989w211686538p203207761/_u.date00=20201201&_u.date01=20210212&explorer-segmentExplorer.segmentId=analytics.screenResolution&explorer-table.plotKeys=%5B%5D/
 const WIDTH_BREAKPOINTS = [
+  320, // 16.8% lighthouse mobile default
   360, // 16.8% lighthouse mobile default
-  // 375, // 6.2%
-  // 412, // 6% (+ 414 5.2%) = 11.2%
+  375, // 6.2%
+  412, // 6% (+ 414 5.2%) = 11.2%
   920, // our default ¯\_(ツ)_/¯
   1366, // 19%
   1440, // 4.1%
