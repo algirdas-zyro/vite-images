@@ -5,6 +5,7 @@
       :sizes="sizes"
       :src="src"
       :srcset="srcset"
+      :width="width"
       @load="handleOnLoad($event)"
     />
     {{ currentSrc }}
@@ -69,8 +70,8 @@ export default {
       naturalWidth.value = target.naturalWidth;
     };
 
-    const getCloudflareUrl = (url, options, toWeb = false) => {
-      return url;
+    const getCloudflareUrl = (url, options, toWebp = false) => {
+      return `${url}?w=${options?.width}`;
     };
 
     const sizes = computed(
