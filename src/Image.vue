@@ -6,30 +6,17 @@
       :src="src"
       :srcset="srcset"
       @load="handleOnLoad($event)"
-    />
-    {{ currentSrc }}
-    {{ naturalWidth }}
+    /><br />
+    currentSrc: <br />{{ currentSrc }} <br />
+    naturalWidth <br />{{ naturalWidth }}<br />
+    pixelRatio: <br />{{ pixelRatio }}<br />
   </div>
 </template>
 
 <script>
-import { ref, computed, render } from "vue";
+import { ref, computed } from "vue";
 
 const BUILDER_MOBILE_BREAKPOINT = 920;
-
-// w = 5000px
-
-// https://analytics.google.com/analytics/web/#/report/visitors-browser/a26575989w211686538p203207761/_u.date00=20201201&_u.date01=20210212&explorer-segmentExplorer.segmentId=analytics.screenResolution&explorer-table.plotKeys=%5B%5D/
-const WIDTH_BREAKPOINTS = [
-  360, // 16.8% lighthouse mobile default *2 *3 720 *1080
-  // width, // * 2
-  1440, // 4.1% * 2
-  1920, // 12.6% * 2
-];
-
-const DPI_LEVELS = [1, 2, 3];
-
-const SRC = "https://ik.imagekit.io/ghykvifc0ny/DSC05804_IXuabbBeW.JPG";
 
 export default {
   props: {
@@ -58,9 +45,12 @@ export default {
     /** DEMO DATA START */
     const currentSrc = ref(null);
     const naturalWidth = ref(null);
+    const displayedWidth = ref(null);
+    const pixelRatio = window.devicePixelRatio;
     const handleOnLoad = ({ target }) => {
       currentSrc.value = target.currentSrc;
       naturalWidth.value = target.naturalWidth;
+      displayedWidth.value = target.displayedWidth;
     };
     /** DEMO DATA END */
 
@@ -139,6 +129,8 @@ export default {
       handleOnLoad,
       currentSrc,
       naturalWidth,
+      displayedWidth,
+      pixelRatio,
       sizes,
       src,
       srcset,
