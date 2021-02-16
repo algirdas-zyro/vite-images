@@ -74,7 +74,7 @@ export default {
       // Mobile device resolutions (can be added later on);
       const MOBILE_RESOLUTIONS = [360];
       // Mobile DPI levels
-      const MOBILE_DPI_LEVELS = [1, 2, 3];
+      const MOBILE_DPI_LEVELS = [1, 2, 2.625, 3]; // XXHDPI Density
       // Desktop resolutions (used only  to trim backgrounds);
       const DESKTOP_RESOLUTIONS = [1440, 1920];
       // Desktop DPI levels
