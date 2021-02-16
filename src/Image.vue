@@ -56,7 +56,7 @@ export default {
 
     const getCloudflareUrl = (url, options, toWebp = false) => {
       console.log({ url, options });
-      return `${url}?w=${options?.width}`;
+      return `${url}?w=${options?.width}&h=${options?.height}`;
     };
 
     /**
@@ -82,8 +82,8 @@ export default {
 
       // If we know width and height, we can generate precice size for desktops:
       const desktopGridSrcset = DESKTOP_DPI_LEVELS.map((dpi) => {
-        const width = props.width * dpi;
-        const height = props.height * dpi;
+        const width = Math.floor(props.width * dpi);
+        const height = Math.floor(props.height * dpi);
 
         return `${getCloudflareUrl(props.url, { width, height })} ${width}w`;
       }).join(", ");
@@ -96,23 +96,30 @@ export default {
         const cssWidth = resolution - mobileOffset;
         // Loop through all DIP levels and multiply css render area size by DPI
         return MOBILE_DPI_LEVELS.map((dpi) => {
-          // Get image width at that resoluion
-          const width = cssWidth * dpi;
-          return `${getCloudflareUrl(props.url, { width })} ${width}w`;
+          // Get ratio from props
+          const ratio = props.width / props.height;
+          // Get image width at that resolution
+          const width = Math.floor(cssWidth * dpi);
+          // Calculate height at current width
+          const height = Math.floor(width / ratio);
+
+          return `${getCloudflareUrl(props.url, { width, height })} ${width}w`;
         }).join(", ");
       }).join(", ");
 
       // For backgrounds - concat desktop clip resolutions (to prevent massive images)
       const desktopFullWidthSrcset = DESKTOP_RESOLUTIONS.map((resolution) => {
         return DESKTOP_DPI_LEVELS.map((dpi) => {
-          const width = resolution * dpi;
+          const width = Math.floor(resolution * dpi);
+
           return `${getCloudflareUrl(props.url, { width })} ${width}w`;
         });
       }).join(", ");
 
       const mobileFullWidthSrcset = MOBILE_RESOLUTIONS.map((resolution) => {
         return MOBILE_DPI_LEVELS.map((dpi) => {
-          const width = resolution * dpi;
+          const width = Math.floor(resolution * dpi);
+
           return `${getCloudflareUrl(props.url, { width })} ${width}w`;
         });
       }).join(", ");
@@ -132,7 +139,7 @@ export default {
       displayedWidth,
       pixelRatio,
       sizes,
-      src,
+      src: props.url,
       srcset,
     };
   },
