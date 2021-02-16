@@ -13,26 +13,19 @@
 </template>
 
 <script>
-import { ref, computed } from "vue";
+import { ref, computed, render } from "vue";
 
 const BUILDER_MOBILE_BREAKPOINT = 920;
 
+// w = 5000px
+
 // https://analytics.google.com/analytics/web/#/report/visitors-browser/a26575989w211686538p203207761/_u.date00=20201201&_u.date01=20210212&explorer-segmentExplorer.segmentId=analytics.screenResolution&explorer-table.plotKeys=%5B%5D/
 const WIDTH_BREAKPOINTS = [
-  320, // 16.8% lighthouse mobile default
-  360, // 16.8% lighthouse mobile default
-  375, // 6.2%
-  412, // 6% (+ 414 5.2%) = 11.2%
-  920, // our default ¯\_(ツ)_/¯
-  1366, // 19%
-  1440, // 4.1%
-  1920, // 12.6%
+  360, // 16.8% lighthouse mobile default *2 *3 720 *1080
+  // width, // * 2
+  1440, // 4.1% * 2
+  1920, // 12.6% * 2
 ];
-
-// const SIZES = [
-//   "666px", // explicit width
-//   `calc(100vw - ${props.mobilePadding * 2}px)`, // mobile full-width image
-// ];
 
 const DPI_LEVELS = [1, 2, 3];
 
@@ -62,41 +55,82 @@ export default {
     },
   },
   setup(props) {
+    /** DEMO DATA START */
     const currentSrc = ref(null);
     const naturalWidth = ref(null);
-
     const handleOnLoad = ({ target }) => {
       currentSrc.value = target.currentSrc;
       naturalWidth.value = target.naturalWidth;
     };
+    /** DEMO DATA END */
 
     const getCloudflareUrl = (url, options, toWebp = false) => {
+      console.log({ url, options });
       return `${url}?w=${options?.width}`;
     };
 
-    const sizes = computed(
-      () =>
-        `(min-width: ${BUILDER_MOBILE_BREAKPOINT}px) ${
-          props.width
-        }px, calc(100vw - ${props.mobilePadding * 2}px)`
-    );
+    /**
+     * 'sizes' attribute describes how much width image will take up after it's rendered.
+     * (before even start to load an image)
+     * We can provide media query to help the browser.
+     */
+    // TODO: make computed?..
+    const sizes = [
+      `(min-width: ${BUILDER_MOBILE_BREAKPOINT}px) ${props.width}px`,
+      `calc(100vw - ${props.mobilePadding * 2}px)`,
+    ].join(", ");
 
     const srcset = computed(() => {
-      // ADD DPI LEVELS HERE
-      return WIDTH_BREAKPOINTS.filter((width) => width < props.width)
-        .reduce(
-          (acc, curr) => {
-            const mobileSrcsets = DPI_LEVELS.map(
-              (level) => level * (curr - props.mobilePadding * 2)
-            );
-            return [...acc, ...mobileSrcsets];
-          },
-          [+props.width, +props.width * 2]
-        )
-        .sort((a, b) => a - b)
-        .map((width) => `${getCloudflareUrl(props.url, { width })} ${width}w`)
-        .join(", ");
-      console.log({ widths });
+      // Mobile device resolutions (can be added later on);
+      const MOBILE_RESOLUTIONS = [360];
+      // Mobile DPI levels
+      const MOBILE_DPI_LEVELS = [1, 2, 3];
+      // Desktop resolutions (used only  to trim backgrounds);
+      const DESKTOP_RESOLUTIONS = [1440, 1920];
+      // Desktop DPI levels
+      const DESKTOP_DPI_LEVELS = [1, 2];
+
+      // If we know width and height, we can generate precice size for desktops:
+      const desktopGridSrcset = DESKTOP_DPI_LEVELS.map((dpi) => {
+        const width = props.width * dpi;
+        const height = props.height * dpi;
+
+        return `${getCloudflareUrl(props.url, { width, height })} ${width}w`;
+      }).join(", ");
+
+      // Pin mobile offset from sides - we'll need to subtract it
+      const mobileOffset = props.mobilePadding * 2;
+      // Loop through all defined mobile resolutions:
+      const mobileGridSrcset = MOBILE_RESOLUTIONS.map((resolution) => {
+        // Get CSS width of render area
+        const cssWidth = resolution - mobileOffset;
+        // Loop through all DIP levels and multiply css render area size by DPI
+        return MOBILE_DPI_LEVELS.map((dpi) => {
+          // Get image width at that resoluion
+          const width = cssWidth * dpi;
+          return `${getCloudflareUrl(props.url, { width })} ${width}w`;
+        }).join(", ");
+      }).join(", ");
+
+      // For backgrounds - concat desktop clip resolutions (to prevent massive images)
+      const desktopFullWidthSrcset = DESKTOP_RESOLUTIONS.map((resolution) => {
+        return DESKTOP_DPI_LEVELS.map((dpi) => {
+          const width = resolution * dpi;
+          return `${getCloudflareUrl(props.url, { width })} ${width}w`;
+        });
+      }).join(", ");
+
+      const mobileFullWidthSrcset = MOBILE_RESOLUTIONS.map((resolution) => {
+        return MOBILE_DPI_LEVELS.map((dpi) => {
+          const width = resolution * dpi;
+          return `${getCloudflareUrl(props.url, { width })} ${width}w`;
+        });
+      }).join(", ");
+
+      const gridSrcset = `${mobileGridSrcset}, ${desktopGridSrcset}`;
+      const fullWidthSrcset = `${mobileFullWidthSrcset}, ${desktopFullWidthSrcset}`;
+
+      return gridSrcset;
     });
 
     const src = computed(() => getCloudflareUrl(props.url)); // REPLACE WITH COMPOSABLE

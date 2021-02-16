@@ -6,8 +6,8 @@
         <div class="w-full">
           <Image
             url="https://images.unsplash.com/photo-1543213324-024b81adc95f"
-            width="666"
-            height="368"
+            :width="666"
+            :height="368"
           />
         </div>
       </div>
