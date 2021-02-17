@@ -10,6 +10,13 @@
             :height="368"
           />
         </div>
+        <div class="w-full">
+          <Image
+            url="https://assets.zyrosite.com//A1ak13JjewU4K18q/img-A85N2LP5vxsarKk3.jpg"
+            :width="366"
+            :height="168"
+          />
+        </div>
       </div>
     </div>
   </section>
