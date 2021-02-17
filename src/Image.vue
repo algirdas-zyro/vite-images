@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="wrapper" :style="{ width: `${width}px`, height: `${height}px` }">
     <img
       :alt="'alt'"
       :sizes="sizes"
@@ -7,6 +7,8 @@
       :srcset="srcset"
       @load="handleOnLoad($event)"
     /><br />
+  </div>
+  <div>
     currentSrc: <br />{{ currentSrc }} <br />
     naturalWidth <br />{{ naturalWidth }}<br />
     pixelRatio: <br />{{ pixelRatio }}<br />
@@ -62,46 +64,61 @@ export const getMimeType = (fileNameWithExtension) =>
     .replace("jpg", "jpeg") // fix errorneous jpg type
     .replace("", "image/"); // prepend `image/` to the type
 
-export const getCloudflareSrc = (origin, src, options, toWebp) => {
-  console.log("OPTIMIZE FOR CLOUDFLARE");
+/**
+ * Web URL API is not used as it needs core-js runtime polyfill
+ * Read more: (https://github.com/zloirock/core-js/issues/117)
+ */
+
+export const getCloudflareSrc = (origin, src, options) => {
+  /**
+   * Cloudflare service options: https://developers.cloudflare.com/images/url-format#options
+   * 'format=auto' - picks best supported format (usually webp) via user-agent
+   * 'fit=scale-down' - same as `object-fit: contain` except it doesn't enlarge
+   * 'fit=crop' - same as `object-fit: cover` except it doesn't enlarge (default)
+   */
 
   const optionString = [
-    options.width && `width=${options.width}`,
-    // options.height && `height=${options.height}`,
-    options.fit && `fit=${options.fit}`,
-    options.isLossless && "quality=100", // override default lossy 85
+    "format=auto",
+    options.width && `w=${options.width}`,
+    options.height && `h=${options.height}`,
+    options.shouldContain ? "fit=scale-down" : "fit=crop",
+    options.isLossless && "q=100", // override default lossy 85
   ]
     .filter((param) => !!param)
     .join(",");
 
-  // return `${origin}/${CLOUDFLARE_PREFIX}/${optionString}/${src}`;
-  return `alioalio`;
+  return `${origin}/${CLOUDFLARE_PREFIX}/${optionString}/${src}`;
 };
 
-export const getUnsplashSrc = (src, options, toWebp) => {
+export const getUnsplashSrc = (src, options) => {
+  /**
+   * Unsplash service options: https://docs.imgix.com/apis/rendering
+   * 'auto=format' - picks best supported format (usually webp) via user-agent
+   * 'fit=clip' - same as `object-fit: contain` except it doesn't enlarge
+   * 'fit=crop' - same as `object-fit: cover` except it doesn't enlarge (default)
+   */
+
   const optionString = [
-    options.width && `width=${options.width}`,
-    options.height && `height=${options.height}`,
-    options.fit && `fit=${options.fit}`,
-    options.isLossless && "quality=100", // override default lossy 85
+    "auto=format", // automatically select format from user-agent
+    options.width && `w=${options.width}`,
+    options.height && `h=${options.height}`,
+    options.shouldContain ? "fit=scale-down" : "fit=crop",
+    options.isLossless && "q=100", // override default lossy 75
   ]
     .filter((param) => !!param)
     .join("&");
 
-  // return `${origin}/${CLOUDFLARE_PREFIX}/${optionString}/${src}`;
-  // return `${src}?w=${options?.width}`;
   return `${src}?${optionString}`;
-  // return src;
 };
 
-export const getOptimizedSrc = (src, options, toWebp = false) => {
+export const getOptimizedSrc = (src, options) => {
   const [cloudflareOrigin] = CLOUDFLARE_ORIGINS.filter((o) => src.includes(o));
   if (cloudflareOrigin) {
-    return getCloudflareSrc(cloudflareOrigin, src, options, toWebp);
+    return getCloudflareSrc(cloudflareOrigin, src, options);
   }
 
   if (src.includes(UNSPLASH_ORIGIN)) {
-    return getUnsplashSrc(src, options, toWebp);
+    return getUnsplashSrc(src, options);
   }
 
   return src;
@@ -217,3 +234,18 @@ export default {
   },
 };
 </script>
+
+<style>
+.wrapper {
+  position: relative;
+}
+
+img {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+</style>
