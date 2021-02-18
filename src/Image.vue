@@ -106,6 +106,104 @@ export const getOptimizedSrc = (src, options = {}) => {
   return src;
 };
 
+export const getGridItemSrcet = (
+  url,
+  gridItemWidth,
+  gridItemHeigt,
+  mobilePadding
+) => {
+  const desktopGridSrcset = DESKTOP_DPI_LEVELS.map((dpi) => {
+    const width = Math.round(gridItemWidth * dpi);
+    const height = Math.round(gridItemHeigt * dpi);
+
+    return `${getOptimizedSrc(url, { width, height })} ${width}w`;
+  }).join(", ");
+
+  // Pin mobile offset from sides - we'll need to subtract it
+  const mobileOffset = mobilePadding * 2;
+  // Loop through all defined mobile resolutions:
+  const mobileGridSrcset = MOBILE_RESOLUTIONS.map((resolution) => {
+    // Get CSS width of render area
+    const cssWidth = resolution - mobileOffset;
+    // Loop through all DIP levels and multiply css render area size by DPI
+    return MOBILE_DPI_LEVELS.map((dpi) => {
+      // Get ratio from props
+      const ratio = gridItemWidth / gridItemHeigt;
+      // Get image width at that resolution
+      const width = Math.round(cssWidth * dpi);
+      // Calculate height at current width (something's not right here)
+      const height = Math.round(width / ratio);
+
+      return `${getOptimizedSrc(url, { width, height })} ${width}w`;
+    }).join(", ");
+  }).join(", ");
+
+  return `${mobileGridSrcset}, ${desktopGridSrcset}`;
+};
+
+// For backgrounds - concat desktop clip resolutions (to prevent massive images)
+export const getFullWidthSrcset = (url) => {
+  const desktopFullWidthSrcset = DESKTOP_RESOLUTIONS.map((resolution) => {
+    return DESKTOP_DPI_LEVELS.map((dpi) => {
+      const width = Math.round(resolution * dpi);
+
+      return `${getOptimizedSrc(url, { width })} ${width}w`;
+    });
+  }).join(", ");
+
+  const mobileFullWidthSrcset = MOBILE_RESOLUTIONS.map((resolution) => {
+    return MOBILE_DPI_LEVELS.map((dpi) => {
+      const width = Math.round(resolution * dpi);
+
+      return `${getOptimizedSrc(url, { width })} ${width}w`;
+    });
+  }).join(", ");
+
+  return `${mobileFullWidthSrcset}, ${desktopFullWidthSrcset}`;
+};
+
+export const useSrcset = (props) => {
+  /**
+   * 'sizes' attribute describes how much width image will take up after it's rendered.
+   * (before even start to load an image)
+   * We can provide media query to help the browser.
+   */
+  const gridItemSizes = computed(() =>
+    [
+      `(min-width: ${BUILDER_MOBILE_BREAKPOINT}px) ${props.width}px`,
+      `calc(100vw - ${props.mobilePadding * 2}px)`,
+    ].join(", ")
+  );
+
+  // No need for computed here, however let's keep data structure consistant
+  const fullScreenSizes = computed(() => "100vw");
+
+  const srcset = computed(() => {
+    const gridSrcset = getGridItemSrcet(
+      props.url,
+      props.width,
+      props.height,
+      props.mobilePadding
+    );
+    const fullWidthSrcset = getFullWidthSrcset(props.url);
+
+    return gridSrcset;
+  });
+
+  const src = computed(() =>
+    getOptimizedSrc(props.url, {
+      width: props.width,
+      height: props.height,
+    })
+  );
+
+  return {
+    sizes: gridItemSizes,
+    src,
+    srcset,
+  };
+};
+
 export default {
   props: {
     url: {
@@ -140,81 +238,14 @@ export default {
     };
     /** DEMO DATA END */
 
-    /**
-     * 'sizes' attribute describes how much width image will take up after it's rendered.
-     * (before even start to load an image)
-     * We can provide media query to help the browser.
-     */
-    // TODO: make computed?..
-    // TODO: test if using CSS variable '--m-block-padding' would work
-    const gridSizes = [
-      `(min-width: ${BUILDER_MOBILE_BREAKPOINT}px) ${props.width}px`,
-      `calc(100vw - ${props.mobilePadding * 2}px)`,
-    ].join(", ");
-
-    const srcset = computed(() => {
-      const desktopGridSrcset = DESKTOP_DPI_LEVELS.map((dpi) => {
-        const width = Math.round(props.width * dpi);
-        const height = Math.round(props.height * dpi);
-
-        return `${getOptimizedSrc(props.url, { width, height })} ${width}w`;
-      }).join(", ");
-
-      // Pin mobile offset from sides - we'll need to subtract it
-      const mobileOffset = props.mobilePadding * 2;
-      // Loop through all defined mobile resolutions:
-      const mobileGridSrcset = MOBILE_RESOLUTIONS.map((resolution) => {
-        // Get CSS width of render area
-        const cssWidth = resolution - mobileOffset;
-        // Loop through all DIP levels and multiply css render area size by DPI
-        return MOBILE_DPI_LEVELS.map((dpi) => {
-          // Get ratio from props
-          const ratio = props.width / props.height;
-          // Get image width at that resolution
-          const width = Math.round(cssWidth * dpi);
-          // Calculate height at current width (something's not right here)
-          const height = Math.round(width / ratio);
-
-          return `${getOptimizedSrc(props.url, { width, height })} ${width}w`;
-        }).join(", ");
-      }).join(", ");
-
-      // For backgrounds - concat desktop clip resolutions (to prevent massive images)
-      const desktopFullWidthSrcset = DESKTOP_RESOLUTIONS.map((resolution) => {
-        return DESKTOP_DPI_LEVELS.map((dpi) => {
-          const width = Math.round(resolution * dpi);
-
-          return `${getOptimizedSrc(props.url, { width })} ${width}w`;
-        });
-      }).join(", ");
-
-      const mobileFullWidthSrcset = MOBILE_RESOLUTIONS.map((resolution) => {
-        return MOBILE_DPI_LEVELS.map((dpi) => {
-          const width = Math.round(resolution * dpi);
-
-          return `${getOptimizedSrc(props.url, { width })} ${width}w`;
-        });
-      }).join(", ");
-
-      const gridSrcset = `${mobileGridSrcset}, ${desktopGridSrcset}`;
-      const fullWidthSrcset = `${mobileFullWidthSrcset}, ${desktopFullWidthSrcset}`;
-
-      return gridSrcset;
-    });
-
-    const src = computed(() =>
-      getOptimizedSrc(props.url, {
-        width: props.width,
-        height: props.height,
-      })
-    );
+    const { sizes, src, srcset } = useSrcset(props);
 
     return {
       handleOnLoad,
       currentSrc,
       naturalWidth,
       pixelRatio,
-      sizes: gridSizes,
+      sizes,
       src,
       srcset,
     };
