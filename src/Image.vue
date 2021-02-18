@@ -44,26 +44,6 @@ export const DESKTOP_RESOLUTIONS = [1440, 1920];
 // Desktop DPI levels
 export const DESKTOP_DPI_LEVELS = [1, 2];
 
-// If we know width and height, we can generate precice size for desktops:
-
-export const getFileNameWithExtension = (src) => {
-  const [fileName, fileExtension] = src
-    .split("?")[0] // remove query string, if any
-    .split("/")
-    .slice(-1)[0] // get the last part of the path
-    .split(".");
-
-  return `${fileName}.${fileExtension}`;
-};
-
-export const getMimeType = (fileNameWithExtension) =>
-  fileNameWithExtension
-    .split(".")
-    .slice(-1)[0]
-    .toLowerCase() // MIME type is lowercase
-    .replace("jpg", "jpeg") // fix errorneous jpg type
-    .replace("", "image/"); // prepend `image/` to the type
-
 /**
  * Web URL API is not used as it needs core-js runtime polyfill
  * Read more: (https://github.com/zloirock/core-js/issues/117)
@@ -87,7 +67,9 @@ export const getCloudflareSrc = (origin, src, options) => {
     .filter((param) => !!param)
     .join(",");
 
-  return `${origin}/${CLOUDFLARE_PREFIX}/${optionString}/${src}`;
+  const [, path] = src.split(origin);
+
+  return `${origin}/${CLOUDFLARE_PREFIX}/${optionString}/${path}`;
 };
 
 export const getUnsplashSrc = (src, options) => {
@@ -99,10 +81,10 @@ export const getUnsplashSrc = (src, options) => {
    */
 
   const optionString = [
-    "auto=format", // automatically select format from user-agent
+    "auto=format",
     options.width && `w=${options.width}`,
     options.height && `h=${options.height}`,
-    options.shouldContain ? "fit=scale-down" : "fit=crop",
+    options.shouldContain ? "fit=clip" : "fit=crop",
     options.isLossless && "q=100", // override default lossy 75
   ]
     .filter((param) => !!param)
@@ -111,7 +93,7 @@ export const getUnsplashSrc = (src, options) => {
   return `${src}?${optionString}`;
 };
 
-export const getOptimizedSrc = (src, options) => {
+export const getOptimizedSrc = (src, options = {}) => {
   const [cloudflareOrigin] = CLOUDFLARE_ORIGINS.filter((o) => src.includes(o));
   if (cloudflareOrigin) {
     return getCloudflareSrc(cloudflareOrigin, src, options);
@@ -220,7 +202,12 @@ export default {
       return gridSrcset;
     });
 
-    const src = computed(() => getOptimizedSrc(props.url)); // REPLACE WITH COMPOSABLE
+    const src = computed(() =>
+      getOptimizedSrc(props.url, {
+        width: props.width,
+        height: props.height,
+      })
+    );
 
     return {
       handleOnLoad,
@@ -228,7 +215,7 @@ export default {
       naturalWidth,
       pixelRatio,
       sizes: gridSizes,
-      src: props.url,
+      src,
       srcset,
     };
   },

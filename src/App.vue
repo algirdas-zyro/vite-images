@@ -1,6 +1,6 @@
 <template>
   <section class="bg-gray-100 p-4 min-h-screen">
-            <!-- url="https://assets.zyrosite.com//A1ak13JjewU4K18q/img-A85N2LP5vxsarKk3-w1370.jpg" -->
+    <!-- url="https://assets.zyrosite.com//A1ak13JjewU4K18q/img-A85N2LP5vxsarKk3-w1370.jpg" -->
     <div class="container mx-auto">
       <div class="flex flex-wrap">
         <div class="w-full">
